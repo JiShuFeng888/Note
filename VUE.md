@@ -1,5 +1,5 @@
 ### 1.vue模板
-
+接口请求一般放在 mounted 中，但需要注意的是服务端渲染时不支持 mounted， 需要放到 created 中。
 ```javascript
 <!DOCTYPE html>
 <html lang="en">
@@ -1942,7 +1942,15 @@ v-on:leave-cancelled="leaveCancelled" 离开动画被取消
 
 1.1导入Velocity库
 1.2在动画执行过程钩子函数中编写Velocity动画
--->
+before-enter进入过渡前
+enter过渡运行时
+after-enter过渡完成后
+enter-cancelled过渡被打断时
+
+before-leave离开过渡运行前
+leave离开过渡运行时
+after-leave离开过渡运行后
+leave-cancelled离开过渡被打断时
 
 <!--这里就是MVVM中的View-->
 <div id="app">
@@ -5846,5 +5854,71 @@ import
 
 const vconsole = new vConsole()
 Vue.use(vconsole)
+```
+
+### 72.递归组件
+
+```javascript
+<template>
+    <div>
+        <div class="list-item" v-for="(item, index) in list" :key="index">
+            <div class="item-name">
+                <span>{{item.name}}</span>
+            </div>
+            <div v-if="item.children" class="children-item">
+                <list :list="item.children"></list>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+export default {
+  name: "List",
+  props: {
+    list: Array
+  }
+};
+</script>
+
+
+
+
+<template>
+    <div class="list-detail">
+      <list :list="list"></list>
+    </div>
+</template>
+<script>
+import List from "./components/List";
+export default {
+  name: "Parent",
+  components: { List },
+  data() {
+    return {
+      list: [{
+          name: "经济",
+          children: [{
+              name: "如家",
+              children: [{
+                  name: "上江路-如家"
+                },
+                {
+                  name: "望江路-如家"
+                }]
+            },{
+              name: "7天",
+              children: [{
+                  name: "长江路-7天"
+                },
+                {
+                  name: "望江路-7天"
+                }]
+            }]
+        }]
+    }
+  }
+}
+</script>
+
 ```
 

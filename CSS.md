@@ -2,19 +2,30 @@
 
 ![批注 2020-11-24 083714](C:\Users\阔乐c\Desktop\批注 2020-11-24 083714.png)
 
-### margin-left:auto
-
 ```javascript
+只要元素满足下面任一条件即可触发 BFC 特性：
 
+body 根元素
+浮动元素：float 除 none 以外的值
+绝对定位元素：position (absolute、fixed)
+display 为 inline-block、table-cells、flex
+overflow 除了 visible 以外的值 (hidden、auto、scroll)
+
+
+1. 同一个 BFC 下外边距会发生折叠
+2. BFC 可以包含浮动的元素（清除浮动）
+3. BFC 可以阻止元素被浮动元素覆盖
 ```
 
-
+margin-left:auto
 
 style 标签只能放在 head 标签里, 与 title 标签是兄弟关系.
 
 css 有**两大块知识点**: 选择器和属性.
 
 开山名义: 盒模型由外到内包括外边距, 边框, 内边距, 内容. 英文写作 margin, border, padding, content
+
+draggable:设置元素是否可以拖拽
 
 ## html 与 css 的关系
 
