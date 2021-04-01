@@ -76,6 +76,19 @@ $ touch .gitignore
 	5.无需备份多个文件, 每次commit提交Git会自动备份
 
 
+Git强制提交本地分支覆盖远程分支
+
+git push origin 分支名 --force
+例子：
+
+cd 代码目录
+git push origin master --force
+ 
+
+Git远程服务器覆盖本地版本
+
+git fetch --all
+git reset --hard origin/master
 
 ```
 

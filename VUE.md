@@ -5120,6 +5120,106 @@ Watch属性不仅仅能够监听数据的变化, 还能够监听路由地址的�
 </html>
 ```
 
+### VueRouter-路由滚动行为
+
+```javascript
+    const router = new VueRouter({
+        routes: routes,
+		//有滚动条才生效
+		scrollBehavior(to,from,savedPosition){
+			return {
+				if(savedPosition){
+					return savedPosition
+					//滚动到用户上次保存的地方
+				}
+				
+				if(to.hash){
+					return {
+						selector:to.hash
+					}
+				}
+				x:0,y:500//写死的
+			}
+		}
+    });
+```
+
+### VueRouter-导航守卫
+
+```javascript
+ //全局级别，在导出路由前设置
+ router.beforeEach((to,from,next)=>{
+ 	//允许进入新路由,不写默认不允许进入
+ 	next()
+ 	next(false)
+ 	next('/user') 
+	next({name:User})
+	
+	
+ 	
+ })
+ 
+ 
+ //路由级别，在路由规则中设置
+  const routes = [
+        // 数组中的每一个对象就是一条规则
+        { path: '/one', component: one },
+        {
+        	path: '/two',
+        	component: two,
+           beforeEnter((to,from,next)=>{
+               //允许进入新路由,不写默认不允许进入
+               next()
+               next(false)
+               next('/user') 
+               next({name:User})
+               
+               
+           })
+        }
+    ];
+    
+    
+    
+   //路由级别，在组件本身中设置,以生命周期钩子函数形式出现
+   	methods: {
+            say(){
+                console.log("say");
+            }
+        },
+    beforeRouteEnter((to,from,next)=>{
+               //允许进入新路由,不写默认不允许进入
+               next()
+               next(false)
+               next('/user') 
+               next({name:User})
+               
+               if(true){
+               		next()
+               }else{
+              	 next((vm)=>{
+               	 vm.link 
+                 //组件的实例
+               })
+               }
+               
+           }),
+        
+        
+	beforeRouteLeave((to,from,next)=>{
+        if(false){
+            next();
+        }else{
+            if(confirm('确定要离开吗?')){
+                //弹窗s
+                next();
+           }else{
+            	next(false);          
+           } 
+        }
+    }
+```
+
 ### 62.Vue-生命周期方法一
 
 ```javascript
