@@ -1256,7 +1256,7 @@ timeupdate(el){
 transition 要想刚进来时有动画就用appear
 ```
 
-### 36.iscroll记得刷刷新
+### 36.有内容增删iscroll记得刷新
 
 ```
 常刷新
@@ -1289,7 +1289,7 @@ this.$refs.lyric.$el.offsetHeight
           obj.name=value.name;
           obj.id=value.id;
           // obj.url=url.data[index].url;
-          //我要装逼了,歌曲的url 不是按照请求的id 顺序来返回的
+          //歌曲的url 不是按照请求的id 顺序来返回的
           for(let i=0;i<url.data.length;i++){
               if(url.data[i].id===value.id){
                 obj.url=url.data[i].url;
@@ -1951,11 +1951,12 @@ npm install  jsdom --save -d
 优化播放器背景图片显示,优化动画,修复播放器离场动画失效
 优化迷你播放器标题显示
 优化列表播放器动画和标题显示
-优化歌单第一次点击不是第一首歌曲失效
+解决歌单第一次点击不是第一首歌曲失效
 优化标题到导致换行问题
 新增歌曲评论界面
 删除接口失效的歌曲排行榜界面,更改为mv界面
 多处小地方显示优化
+解决字体过小问题
 ```
 
 ### 65.路由跳转类名动画问题
@@ -1964,14 +1965,36 @@ npm install  jsdom --save -d
 父元素不穿透,子元素穿透
 ```
 
-### 66.史诗级bug-歌单第一次点击不是第一首歌曲失效
+### 66.史诗级bug-歌单第一次点击不是第一首的歌曲自动播放第一首歌曲
 
 ```
 第一次尝试
-由于songs是通过网络异步获取的,设置currentIndex是同步的，设置currentIndex为异步后可以，但是要用户等待根据网络状况等待3,400ms左右的时间,而且很不稳定
+由于songs是通过网络异步获取的,而设置currentIndex是同步的，设置currentIndex为setTimeOut后可以，但是要用户等待根据网络状况等待400ms左右的时间,而且很不稳定
 第二次尝试
 取消songs异步，用mapMutaion辅助函数直接赋值！！！！！理论上可以
-失败！！！但是接口中没有url数据！！！，得根据id重新获歌曲！！！服了又回到第一条
+但是失败了！！！因为上一级接口中没有url数据！！！（这不怪我），得根据id重新获歌曲！！！服了又回到第一条
+第三次尝试
+async神器！！！！！
+
+async selectMusic (id, index) {
+  const list = this.playlist.filter(function (value, index) {
+    // console.log(value.name);
+    if (value.name !== '') {
+      return true
+    }
+  })
+  const ids = list.map(function (value) {
+    return value.id
+  })
+  // ids已经是一个数组了
+  await this.setSongDetail(ids)
+  this.setCurrentIndex(index)
+  this.setPlaying(true)
+  this.setFullScreen(true)
+  // this.$store.dispatch('setFullScreen',true);
+},
+
+成功！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
 ```
 
 ### 67.filter首次使用
@@ -1986,7 +2009,7 @@ npm install  jsdom --save -d
 import { getFormattedNumber } from "../tools/tools";
 ```
 
-### 67.iscroll容器配置
+### 67.iscroll容器配置之一
 
 ```javascript
 .mv{
@@ -2021,7 +2044,7 @@ import { getFormattedNumber } from "../tools/tools";
 由于在评论组件隐藏时初始化iscroll导致显示滑动不了,通过vuex判断组件是否是显示状态，更改初始化判断条件
 ```
 
-### 70.微任务MutationObserver
+### 70.微任务MutationObserver--配合iscroll使用
 
 ```javascript
     // 1.创建观察者对象
