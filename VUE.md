@@ -108,6 +108,7 @@ https://www.chromefor.com/vue-js-devtools_v5-3-0/
 在<input>、<textarea> 及 <select> 元素上可以用 v-model 指令创建双向数据绑定
 
 注意点: v-model 会忽略所有表单元素的 value、checked、selected 特性的初始值
+<input v-model="message" placeholder="edit me" /> 
 而总是将 Vue 实例的数据作为数据来源
 -->
 
@@ -551,6 +552,7 @@ v-bind指令给"任意标签"的"任意属性"绑定数据
 :class="[flag?'active':'']"
 2.4可以使用对象来替代数组中的三目运算符按需导入
 :class="[{'active': true}]"
+<div v-bind:class="{ active: isActive }"></div>
 2.5绑定的类名太多可以将类名封装到Model中
 obj: {
     'color': true,
@@ -581,7 +583,7 @@ obj: {
 <!--    <p :class="[size]">我是段落</p>-->
     <!--
     注意点:
-    将类名放到数组中之后, 还需要利用引号将类名括起来才会去style中查找！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+    将类名放到数组中之后, 还需要利用引号将类名括起来才会去style中查找！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！!!!!!
     -->
 <!--    <p :class="['size', 'color', 'active']">我是段落</p>-->
     <!--
@@ -743,6 +745,9 @@ v-on绑定的事件被触发之后, 会去Vue实例对象的methods中查找对�
             myFn(){
                 alert('lnj')
             }
+          // ECMAScript 6 简写方式
+          // 等价于 myFn: function () {}
+          // 注意：仅仅是简写而已，和箭头函数没关系
         }
     });
 </script>
@@ -789,10 +794,10 @@ v-on绑定的事件被触发之后, 会去Vue实例对象的methods中查找对�
 
 2.常见修饰符
 .once    - 只触发一次回调。
-.prevent - 调用 event.preventDefault()。
-.stop    - 调用 event.stopPropagation()。
-.self    - 只当事件是从侦听器绑定的元素本身触发时才触发回调。
-.capture - 添加事件侦听器时使用 capture 模式。
+.prevent - 调用 event.preventDefault()。阻止元素的默认行为
+.stop    - 调用 event.stopPropagation()。阻止事件冒泡
+.self    - 只当事件是从侦听器绑定的元素本身触发时才触发回调。让回调只有当前元素触发事件的时候才执行
+.capture - 添加事件侦听器时使用 capture 模式。事件捕获, 那么就需要使用.capture修饰符
 -->
 
 <!--这里就是MVVM中的View-->
@@ -813,7 +818,7 @@ v-on绑定的事件被触发之后, 会去Vue实例对象的methods中查找对�
         </div>
     </div>-->
     <!--
-    如果想让回调只有当前元素触发事件的时候才执行, 那么就可以使用.self修饰符
+    如果想c, 那么就可以使用.self修饰符
     -->
     <!--<div class="a" @click="myFn1">
         <div class="b" @click.self="myFn2">
@@ -927,6 +932,15 @@ v-on:click="myFn('lnj', 33)"
 2.2自定义修饰符
 -->
 
+    
+      <!-- 技巧：原生的怎么写，只需要把 on 替换为 v-on: -->
+      <!-- <input type="text" v-on:keydown=""> -->
+      <!-- <input type="text" v-on:keyup=""> -->
+      v-on 可以简写
+      提示：在 Vue 中，有且之后 v-bind 和 v-on 有简写，其它都没有
+
+      <!-- <input type="text" @keydown=""> -->
+      <!-- <input type="text" @keyup=""> -->
 <!--这里就是MVVM中的View-->
 <div id="app">
 <!--    <input type="text" @keyup.enter="myFn">-->
@@ -953,7 +967,7 @@ v-on:click="myFn('lnj', 33)"
 </html>
 ```
 
-### 17.自定义指令
+### 17.自定义指令*
 
 ```javascript
 <!DOCTYPE html>
@@ -1185,6 +1199,8 @@ directives: {
 那么计算属性和函数有什么区别呢?
 2.1函数"不会"将计算的结果缓存起来, 每一次访问都会重新求值
 2.2计算属性"会"将计算的结果缓存起来, 只要数据没有发生变化, 就不会重新求值
+• 计算属性是基于它们的响应式依赖进行缓存的。只在相关响应式依赖发生改变时它们才会重新求值。
+• 相比之下，每当触发重新渲染时，调用方法将总会再次执行函数
 
 2.计算属性应用场景
 计算属性:比较适合用于计算不会频繁发生变化的的数据!!!!
@@ -1356,7 +1372,7 @@ filters: {
         el: '#app1',
         // 这里就是MVVM中的Model
         data: {
-            name: "知播渔学院, 指趣学院, 前端学院, 区块链学院"
+            name: ""
         },
         // 专门用于存储监听事件回调函数
         methods: {
@@ -1370,7 +1386,7 @@ filters: {
         el: '#app2',
         // 这里就是MVVM中的Model
         data: {
-            name: "知播渔学院, 指趣学院, 前端学院, 区块链学院"
+            name: "前端学院, 区块链学院"
         },
         // 专门用于存储监听事件回调函数
         methods: {
@@ -2153,13 +2169,17 @@ leave-to-class // 离开动画执行完毕之后
 1.v-for注意点
 1.1v-for为了提升性能, 在更新已渲染过的元素列表时，会采用“就地复用”策略。
 也正是因为这个策略, 在某些时刻会导致我们的数据混乱
+
+当 Vue 正在更新使用 v-for 渲染的元素列表时，它默认使用“就地更新”的策略。如果数据项的顺序被改变，Vue 将不会移动 DOM 元素来匹配数据项的顺序，而是就地更新每个元素，并且确保它们在每个索引位置正确渲染.
+
 例如: 在列表前面新增了内容
 1.2为了解决这个问题, 我们可以在渲染列表的时候给每一个元素加上一个独一无二的key
 v-for在更新已经渲染过的元素列表时, 会先判断key是否相同, 如果相同则复用, 如果不同则重新创建
 
 2.key属性注意点
-不能使用index的作为key,因为当列表的内容新增或者删除时index都会发生变化
--->
+  <!-- 不要使用 index，因为即便数据项的位置发生改变，但是索引不会变 -->
+  <!-- 索引不变，也就意味着 key 的顺序没有改变，那么 Vue 就不会处理 -->
+  //如果内容确保不会发生计算或变化的话可以设index为key
 <!--这里就是MVVM中的View-->
 <div id="app">
     <form>
@@ -3155,6 +3175,7 @@ out-in：当前元素先进行过渡，完成之后新元素过渡进入。
 1.父子组件数据传递?
 在Vue中子组件是不能访问父组件的数据的,
 如果子组件想要访问父组件的数据, 必须通过父组件传递
+Prop 是单向绑定的：当父组件的属性变化时，将传导给子组件，但是反过来不会。这是为了防止子组件无意间修改了父组件的状态，来避免应用的数据流变得难以理解。
 
 2.如何传递数据
 2.1在父组件中通过v-bind传递数据
@@ -3403,12 +3424,13 @@ out-in：当前元素先进行过渡，完成之后新元素过渡进入。
 <body>
 <!--
 1.组件中的命名注意点
-1.1注册组件的时候使用了"驼峰命名", 那么在使用时需要转换成"短横线分隔命名"
+1.1注册组件的时候使用了"驼峰命名", 那么在使用时需要转换成"短横线分隔命名"(也可以首字母大写)
 例如: 注册时: myFather  ->  使用时: my-father
-1.2在传递参数的时候如果想使用"驼峰名称", 那么就必须写"短横线分隔命名"
+1.2在传递参数的时候如果想使用"驼峰名称", 那么就必须写"短横线分隔命名"!!!!
 例如: 传递时: parent-name="name" ->  接收时: props: ["parentName"]
-1.3在传递方法的时候不能使用"驼峰命名", 只能用"短横线分隔命名"
+1.3在传递方法的时候不能使用"驼峰命名", 只能用"短横线分隔命名"!!!!
 @parent-say="say"  -> this.$emit("parent-say");
+(传递参数和方法最好都用短横线命名)
 -->
 <!--这里就是MVVM中的View-->
 <div id="app">
@@ -3759,7 +3781,7 @@ out-in：当前元素先进行过渡，完成之后新元素过渡进入。
 1.什么是v-slot指令?
 v-slot指令是Vue2.6中用于替代slot属性的一个指令
 在Vue2.6之前, 我们通过slot属性告诉Vue当前内容填充到哪一个具名插槽
-从Vue2.6开始, 我们通过v-slot指令告诉Vue当前内容填充到哪一个具名插槽
+从Vue2.6开始, 我们通过v-slot指令告诉Vue当前内容填充到哪一个具名插槽!!!
 
 注意点: v-slot指令只能用在template标签上
         可以使用#号替代v-slot:  !!!!!!!!!!!!!
@@ -4381,6 +4403,34 @@ Vuex的getters属性就和组件的计算属性一样, 会将数据缓存起来,
 </html>
 ```
 
+### mutation 必须是同步函数
+
+### ![1566203230907](VUE.assets/1566203230907.png)
+
+```javascript
+mutation 必须是同步函数
+不要在 Mutation 中执行异步操作修改 state，调试工具无法正常的观测到数据状态的变化。
+如果想要执行异步操作修改 state 怎么办？使用 Action。
+
+• 在 action 中执行异步操作
+• 异步操作结束，提交 mutation 修改 state
+• 注意：也不要在 action 中修改 state
+• 也就是说：修改 state 永远、务必、必须、一定要使用 mutation 函数
+
+
+
+
+异步操作
+1. 在组件中使用 dispatch 调用 action 函数
+2. 在 action 函数中执行异步操作
+3. action 函数中异步操作执行结束，提交 mutation
+• 注意：也不要在 action 中直接修改 state，调试工具工作有问题
+4. 在 mutation 中修改 state
+• 注意：也不要在 mutation 中执行异步操作修改 state，调试工具工作有问题
+• 只有 mutation 中修改 state 才能反应到调试工具中
+5. state 数据发生改变，视图更新
+```
+
 ### 56.VueRouter-基本使用
 
 ```javascript
@@ -4425,6 +4475,20 @@ Vue Router用哈希来切换(#/xxx)
 2.4将路径对象挂载到Vue实例中
 2.5修改URL哈希值
 2.6通过<router-view>渲染匹配的组件
+                 
+注意：使用了 history 模式之后，不要在模板中直接使用普通的 a 链接去跳转，一定要使用 router-link 或者 router.push 进行导航！！！！！！！！！！！！
+重点！！！！！！！！！！！！！！！！！！！！！！！！                
+// 字符串
+this.$router.push('home')
+
+// 对象
+router.push({ path: 'home' })
+
+// 命名的路由
+router.push({ name: 'user', params: { userId: '123' }})
+
+// 带查询参数，变成 /register?plan=private
+router.push({ path: 'register', query: { plan: 'private' }})
 -->
 <!--这里就是MVVM中的View-->
 <div id="app">
@@ -5026,7 +5090,13 @@ Watch属性是专门用于监听数据变化的, 只要数据发生了变化, �
 2.Watch监听路由变化
 Watch属性不仅仅能够监听数据的变化, 还能够监听路由地址的变化
 在企业开发中我们可以通过Watch来判断当前界面是从哪个界面跳转过来的
+
+// 注意：监视的一个功能特性，不是 data、methods、computed 之类的数据，不能用于模板绑定
+count(newVal, oldVal) {
+    console.log(newVal, oldVal);
+}
 -->
+
 <!--这里就是MVVM中的View-->
 <div id="app">
 <!--    <input type="text" v-model="num1" @keyup="change1">-->
@@ -5118,6 +5188,70 @@ Watch属性不仅仅能够监听数据的变化, 还能够监听路由地址的�
 </script>
 </body>
 </html>
+```
+
+###  路由对象 this.$route
+
+```javascript
+一个路由对象 (route object) 表示当前激活的路由的状态信息，包含了当前 URL 解析得到的信息，还有 URL 匹配到的路由记录 (route records)。
+路由对象是不可变 (immutable) 的，每次成功的导航后都会产生一个新的对象。
+路由对象出现在多个地方:
+• 在组件内，即 this.$route
+• 在 $route 观察者回调内
+• router.match(location) 的返回值
+• $route.path
+• 类型: string
+字符串，对应当前路由的路径，总是解析为绝对路径，如 "/foo/bar"。
+• $route.params
+• 类型: Object
+一个 key/value 对象，包含了动态片段和全匹配片段，如果没有路由参数，就是一个空对象。
+• $route.query
+• 类型: Object
+一个 key/value 对象，表示 URL 查询参数。例如，对于路径 /foo?user=1，则有 $route.query.user == 1，如果没有查询参数，则是个空对象。
+• $route.hash
+• 类型: string
+当前路由的 hash 值 (带 #) ，如果没有 hash 值，则为空字符串。
+• $route.fullPath
+• 类型: string
+完成解析后的 URL，包含查询参数和 hash 的完整路径。
+• $route.matched
+• 类型: Array<RouteRecord>
+一个数组，包含当前路由的所有嵌套路径片段的路由记录 。路由记录就是 routes 配置数组中的对象副本 (还有在 children 数组)。
+const router = new VueRouter({
+  routes: [
+    // 下面的对象就是路由记录
+    {
+      path: "/foo",
+      component: Foo,
+      children: [
+        // 这也是个路由记录
+        { path: "bar", component: Bar }
+      ]
+    }
+  ]
+});
+当 URL 为 /foo/bar，$route.matched 将会是一个包含从上到下的所有对象 (副本)。
+• $route.name
+当前路由的名称，如果有的话。(查看命名路由)
+• $route.redirectedFrom
+如果存在重定向，即为重定向来源的路由的名字。(参阅重定向和别名)
+Router 实例
+我们在组件中访问的 this.$router 就是路由文件中创建的路由实例
+API
+作用
+备注
+push
+跳转，会形成历史记录
+想要导航到不同的 URL，则使用 router.push 方法。这个方法会向 history 栈添加一个新的记录，所以，当用户点击浏览器后退按钮时，则回到之前的 URL。
+replace
+路径替换
+跳过去，别回来了
+go
+跳转到指定步骤的路由
+back
+后退一步
+forward
+前进一步
 ```
 
 ### VueRouter-路由滚动行为
@@ -6020,5 +6154,188 @@ export default {
 }
 </script>
 
+```
+
+### 73.axios
+
+```javascript
+执行一个 GET 请求
+axios({
+  // 配置请求相关数据信息
+  method: "GET", // 请求方法
+  url: "http://localhost:3000/users" // 请求路径
+  // params: {}, // Query 参数
+  // data: {} // Body 参数
+}).then(function(res) {
+  // res 是响应对象
+  // 接口返回的数据再 res.data 中
+  //    config: {url: "http://localhost:3000/users", method: "get", headers: {…}, transformRequest: Array(1), transformResponse: Array(1), …}
+  //      本次请求配置信息对象，很少使用
+  //    data: [{…}]
+  //      真正的响应结果数据
+  //    headers: {cache-control: "no-cache", content-length: "84", content-type: "application/json; charset=utf-8", expires: "-1", pragma: "no-cache"}
+  //      响应头数据，很少使用
+  //    request: XMLHttpRequest {readyState: 4, timeout: 0, withCredentials: false, upload: XMLHttpRequestUpload, onreadystatechange: ƒ, …}
+  //      请求对象，几乎不适用
+  //    status: 200
+  //      响应状态码
+  //    statusText: "OK"
+  //      响应状态短语
+  console.log(res.data);
+});
+
+
+带有 Query 参数的 GET 请求
+const user = {
+  name: "张三",
+  age: 18
+};
+axios({
+  method: "GET",
+  // url: 'http://localhost:3000/users?name=' + name + '&age=' + age,
+  // url: `http://localhost:3000/users?name=${name}&age=${age}`,
+  url: "http://localhost:3000/users",
+  // 配置 Query 查询参数
+  // axios 在内部把 params 对象转换为 key=value&key=value 的数据格式
+  // 然后放到 url 后面，把请求发出去
+  params: {
+    // name: user.name,
+    age: user.age
+  }
+}).then(res => {
+  console.log(res);
+});
+
+
+执行一个 POST 请求
+axios({
+  method: "POST",
+  url: "http://localhost:3000/users",
+  data: {
+    // POST 请求体放到 data 中
+    name: "张三风",
+    age: 50,
+    gender: "男"
+  }
+}).then(res => {
+  if (res.status === 201) {
+    console.log("添加成功");
+  }
+});
+
+GET在浏览器回退时是无害的，而POST会再次提交请求。
+```
+
+### 74.跨域(生产环境)
+
+```javascript
+原理：
+	vue同样是运行在node环境下，而node本身就是服务端环境。在vue环境下有个proxy 代理配置，本质上跟php的curl 差不多都是模拟请求，vue项目请求node 的proxy，然后proxy修改origin为服务端地址然后请求服务端，服务端判断请求来源于本站返回给proxy，proxy修改orgin为localhost返回给本地vue项目，浏览器判断符合同源策略允许运行 。proxy相当于解决跨域的中间人，既符合请求服务端要求，又符合返回客户端要求。
+
+Vue本地代理解决跨域问题(开发环境下)
+（1）step1：配置 baseURL
+　　可以自定义一个 js 文件，也可以直接在 main.js 中写。
+
+【main.js】
+import Vue from 'vue'
+import App from './App.vue'
+// step1：引入 axios
+import Axios from 'axios'
+
+Vue.config.productionTip = false
+
+// step2：把axios挂载到vue的原型中，在vue中每个组件都可以使用axios发送请求,
+// 不需要每次都 import一下 axios了，直接使用 $axios 即可
+Vue.prototype.$axios = Axios
+
+// step3：使每次请求都会带一个 /api 前缀 
+Axios.defaults.baseURL = '/api'
+
+new Vue({
+  render: h => h(App),
+}).$mount('#app')
+
+
+（2）step2：修改配置文件（修改后要重启服务）
+　　vue 3.0 通过 vue.config.js 文件 修改配置（若没有，则直接在项目路径下新建即可）。
+
+【vue.config.js】
+module.exports = {
+    devServer: {
+        proxy: {
+            '/api': {
+                // 此处的写法，目的是为了 将 /api 替换成 https://www.baidu.com/
+                target: 'https://www.baidu.com/',
+                // 允许跨域
+                changeOrigin: true,
+                ws: true,
+                pathRewrite: {
+                    '^/api': ''
+                }
+            }
+        }
+    }
+}
+ 
+
+（3）step3：修改 axios 使用方式
+
+【App.vue】
+<template>
+    <div>
+        <button @click="testAxios">TestAxios</button>
+    </div>
+    <!--App -->
+</template>
+
+<script>
+    export default {
+        methods: {
+            testAxios() {
+                // 由于 main.js 里全局定义的 axios,此处直接使用 $axios 即可。
+                // 由于 main.js 里定义了每个请求前缀，此处的 / 即为 /api/， 
+                // 经过 vue.config.js 配置文件的代理设置，会自动转为 https://www.baidu.com/，从而解决跨域问题
+                this.$axios.get('/').then(response => {
+                    if (response.data) {
+                        console.log(response.data)
+                    }
+                }).catch(err => {
+                    alert('请求失败')
+                })
+            }
+        }
+    }
+</script>
+
+
+```
+
+### 75.跨域(开发环境)
+
+```javascript
+1、修改Nginx的配置文件 xxx.conf
+location /api {
+   rewrite  ^.+api/?(.*)$ /$1 break; //可选参数，正则验证地址
+   include  uwsgi_params; //可选参数，uwsgi是服务器和服务端应用程序的通信协议，规定了怎么把请求转发给应用程序和返回
+   proxy_pass   https://www.xxxxx.cn:444; #此处修改为自己的请求地址，必填
+}
+###api为本地开发时，在config/index.js中的proxyTable: {}配置的请求代理
+###根据具体情况修改
+
+2、记得重启Nginx服务，使修改生效
+
+举例：
+
+location /api {
+    rewrite ^.+api/?(.*)$ /$1 break;
+    include uwsgi_params;
+    proxy_pass https://movie.douban.com;
+}
+
+location /bpi {
+    rewrite ^.+bpi/?(.*)$ /$1 break;
+    include uwsgi_params;
+    proxy_pass https://cdnopenapialifc.agaege.com/;
+}
 ```
 

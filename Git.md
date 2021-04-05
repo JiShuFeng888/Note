@@ -1,6 +1,12 @@
 ### 1.Git单人开发
 
 ```
+git remote add origin git地址(添加远程仓库)
+git remote -v(检查)
+git remote remove origin(删除远程仓库s)
+git push -u(记住本次推送的信息) origin master
+git push origin master
+
 $ git init
 Initialized empty Git repository in C:/Users/阔乐c/Desktop/product/.git/
 repository仓库
