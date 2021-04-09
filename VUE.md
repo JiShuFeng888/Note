@@ -4417,7 +4417,7 @@ mutation 必须是同步函数
 • 注意：也不要在 action 中修改 state
 • 也就是说：修改 state 永远、务必、必须、一定要使用 mutation 函数
 
-
+mapMutaion映射本地的方法可以自定义
 
 
 异步操作
@@ -5748,6 +5748,16 @@ ref添加到组件上, 拿到的就是组件
 1.2通过render方法来渲染, 会覆盖Vue实例控制区域 会覆盖vue实例控制区域
 -->
 <!--这里就是MVVM中的View-->
+    
+ new Vue({
+ el: '#root',
+  template: '<App></App>',
+   components: {
+    App
+  }
+ })
+    
+    
 <div id="app">
 <!--    <one></one>-->
 </div>

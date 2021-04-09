@@ -54,13 +54,12 @@ vue.config.js就是webpack配置文件
 ### 3.借助postcss-pxtorem实现自动将px转换成rem
 
 ```
-npm i -D postcss-pxtorem
--D是安装在生产环境中的
-
+npm i -D postcss-pxtorem （安装到开发环境）
+npm i -d postcss-pxtorem （安装到生产环境）
 ！！！
-包名不会进入package.json里面，因此别人不知道你安装了这个包（...智障）
-npm install -d 就是 npm install --save-dev 安装到开发环境 例如 gulp ，babel，webpack 一般都是辅助工具
-npm insatll -s 就是npm install --save 安装到生产环境 如 vue ,react 等
+包名不会进入package.json里面，因此别人不知道你安装了这个包
+npm install -D 就是 npm install --save-dev 安装到开发环境 例如 gulp ，babel，webpack 一般都是辅助工具
+npm insatll -s 就是npm install --save 安装到生产环境 如 vue ,react 等de
 ！！！
 
 新建postcss.config.js配置文件
@@ -80,6 +79,19 @@ module.exports={
         
     }
 }
+
+这个才是
+module.exports = {
+    plugins: {
+      autoprefixer: {},
+      'postcss-pxtorem': {
+        rootValue: 100, // 根元素字体大小
+        // propList: ['width', 'height']
+        propList: ['*']
+      }
+    }
+  }
+  
 ```
 
 ### 4.借助webpack实现CSS3/ES678语法的兼容*
@@ -2067,5 +2079,34 @@ import { getFormattedNumber } from "../tools/tools";
     //每次执行完宏任务之后会立即查看微任务队列的内容
       
     //执行所有的同步代码再执行异步代码！！！！！！！
+```
+
+### 71.iscroll在ios下点击两次的bug
+
+```
+    function iScrollClick(){
+    if (/iPhone|iPad|iPod|Macintosh/i.test(navigator.userAgent)) return false;
+    if (/Chrome/i.test(navigator.userAgent)) return (/Android/i.test(navigator.userAgent));
+    if (/Silk/i.test(navigator.userAgent)) return false;
+    if (/Android/i.test(navigator.userAgent)) {
+       var s=navigator.userAgent.substr(navigator.userAgent.indexOf('Android')+8,3);
+       return parseFloat(s[0]+s[3]) < 44 ? false : true
+    }
+  }
+    this.iscroll = new IScroll(this.$refs.wrapper, {
+      // 点击失效问题
+      // click: true,
+      click:iScrollClick(), //调用判断函数
+      mouseWheel: true,
+      scrollbars: false,
+      probeType: 3,
+      // 解决拖拽卡顿问题
+      scrollX: false,
+      scrollY: true,
+      disablePointer: true,
+      disableTouch: false,
+      disableMouse: true
+    })
+
 ```
 

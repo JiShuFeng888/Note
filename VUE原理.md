@@ -46,7 +46,7 @@
         如果想修改, 那么就必须显示的告诉defineProperty方法  
         writable: true,
         /默认情况下通过defineProperty新增的属性是不能删除的
-         如果想上传, 那么就必须显示的告诉defineProperty方法
+         如果想删除, 那么就必须显示的告诉defineProperty方法
         configurable: true,
         默认情况下通过defineProperty新增的属性是不能迭代的
         如果想迭代, 那么就必须显示的告诉defineProperty方法
