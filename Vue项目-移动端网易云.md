@@ -1190,6 +1190,10 @@ import { getSongDetail } from "./../api/index";
 ### 35.奇怪的写法和知识点
 
 ```javascript
+通过el来获取组件中的DOM元素：
+const defaultHeight = this.$refs.top.$el.offsetHeight
+
+
 <p>{{getLyric()}}<p>
 方法也可以写在大括号里面
 

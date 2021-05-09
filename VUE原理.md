@@ -217,6 +217,543 @@
 ### 4.构建自定义Vue实例
 
 ```javascript
+class Nue {
+    constructor(options){
+        // 1.保存创建时候传递过来的数据
+        if(this.isElement(options.el)){
+            this.$el = options.el;
+        }else{
+            this.$el = document.querySelector(options.el);
+        }
+        this.$data = options.data;
+        // 2.根据指定的区域和数据去编译渲染界面
+        if(this.$el){
+            new Compiler(this)
+        }
+    }
+    // 判断是否是一个元素
+    isElement(node){
+        return node.nodeType === 1;
+    }
+}
+class Compiler {
+    constructor(vm){
+        this.vm = vm;
+    }
+}
+```
+
+### 5.提取元素到内存中
+
+```javascript
+class Nue {
+    constructor(options){
+        // 1.保存创建时候传递过来的数据
+        if(this.isElement(options.el)){
+            this.$el = options.el;
+        }else{
+            this.$el = document.querySelector(options.el);
+        }
+        this.$data = options.data;
+        // 2.根据指定的区域和数据去编译渲染界面
+        if(this.$el){
+            new Compiler(this);
+        }
+    }
+    // 判断是否是一个元素
+    isElement(node){
+        return node.nodeType === 1;
+    }
+}
+class Compiler {
+    constructor(vm){
+        this.vm = vm;
+        // 1.将网页上的元素放到内存中
+        let fragment = this.node2fragment(this.vm.$el);
+        console.log(fragment);
+        // 2.利用指定的数据编译内存中的元素
+        // 3.将编译好的内容重新渲染会网页上
+    }
+    node2fragment(app){
+        // 1.创建一个空的文档碎片对象
+        let fragment = document.createDocumentFragment();
+        // 2.编译循环取到每一个元素
+        let node = app.firstChild;
+        while (node){
+            // 注意点: 只要将元素添加到了文档碎片对象中, 那么这个元素就会自动从网页上消失
+            fragment.appendChild(node);
+            node = app.firstChild;
+        }
+        // 3.返回存储了所有元素的文档碎片对象
+        return fragment;
+    }
+}
+```
+
+### 6.查找指令和模板
+
+```javascript
+class Nue {
+    constructor(options){
+        // 1.保存创建时候传递过来的数据
+        if(this.isElement(options.el)){
+            this.$el = options.el;
+        }else{
+            this.$el = document.querySelector(options.el);
+        }
+        this.$data = options.data;
+        // 2.根据指定的区域和数据去编译渲染界面
+        if(this.$el){
+            new Compiler(this);
+        }
+    }
+    // 判断是否是一个元素
+    isElement(node){
+        return node.nodeType === 1;
+    }
+}
+class Compiler {
+    constructor(vm){
+        this.vm = vm;
+        // 1.将网页上的元素放到内存中
+        let fragment = this.node2fragment(this.vm.$el);
+        // 2.利用指定的数据编译内存中的元素
+        this.buildTemplate(fragment);
+        // 3.将编译好的内容重新渲染会网页上
+    }
+    node2fragment(app){
+        // 1.创建一个空的文档碎片对象
+        let fragment = document.createDocumentFragment();
+        // 2.编译循环取到每一个元素
+        let node = app.firstChild;
+        while (node){
+            // 注意点: 只要将元素添加到了文档碎片对象中, 那么这个元素就会自动从网页上消失
+            fragment.appendChild(node);
+            node = app.firstChild;
+        }
+        // 3.返回存储了所有元素的文档碎片对象
+        return fragment;
+    }
+    buildTemplate(fragment){
+        let nodeList = [...fragment.childNodes];
+        nodeList.forEach(node=>{
+            // 需要判断当前遍历到的节点是一个元素还是一个文本
+            // 如果是一个元素, 我们需要判断有没有v-model属性
+            // 如果是一个文本, 我们需要判断有没有{{}}的内容
+            if(this.vm.isElement(node)){
+                // 是一个元素
+                this.buildElement(node);
+                // 处理子元素(处理后代)
+                this.buildTemplate(node);
+            }else{
+                // 不是一个元素
+                this.buildText(node);
+            }
+        })
+    }
+    buildElement(node){
+        let attrs = [...node.attributes];
+        attrs.forEach(attr => {
+            let {name, value} = attr;
+            if(name.startsWith('v-')){
+                console.log('是Vue的指令, 需要我们处理', name);
+            }
+        })
+    }
+    buildText(node){
+        let content = node.textContent;
+        let reg = /\{\{.+?\}\}/gi;
+        if(reg.test(content)){
+            console.log('是{{}}的文本, 需要我们处理', content);
+        }
+    }
+}
+```
+
+### 7.编译指令数据
+
+```javascript
+let CompilerUtil = {
+    getValue(vm, value){
+        // time.h --> [time, h]
+       return value.split('.').reduce((data, currentKey) => {
+            // 第一次执行: data=$data, currentKey=time
+            // 第二次执行: data=time, currentKey=h
+            return data[currentKey];
+        }, vm.$data);
+    },
+    model: function (node, value, vm) { // value=time.h
+        /*node.value = vm.$data[value]; // vm.$data[time.h] --> vm.$data[time] --> time[h]*/
+        let val = this.getValue(vm, value);
+        node.value = val;
+    },
+    html: function (node, value, vm) {
+        let val = this.getValue(vm, value);
+        node.innerHTML = val;
+    },
+    text: function (node, value, vm) {
+        let val = this.getValue(vm, value);
+        node.innerText = val;
+    }
+}
+class Nue {
+    constructor(options){
+        // 1.保存创建时候传递过来的数据
+        if(this.isElement(options.el)){
+            this.$el = options.el;
+        }else{
+            this.$el = document.querySelector(options.el);
+        }
+        this.$data = options.data;
+        // 2.根据指定的区域和数据去编译渲染界面
+        if(this.$el){
+            new Compiler(this);
+        }
+    }
+    // 判断是否是一个元素
+    isElement(node){
+        return node.nodeType === 1;
+    }
+}
+class Compiler {
+    constructor(vm){
+        this.vm = vm;
+        // 1.将网页上的元素放到内存中
+        let fragment = this.node2fragment(this.vm.$el);
+        // 2.利用指定的数据编译内存中的元素
+        this.buildTemplate(fragment);
+        // 3.将编译好的内容重新渲染会网页上
+        this.vm.$el.appendChild(fragment);
+    }
+    node2fragment(app){
+        // 1.创建一个空的文档碎片对象
+        let fragment = document.createDocumentFragment();
+        // 2.编译循环取到每一个元素
+        let node = app.firstChild;
+        while (node){
+            // 注意点: 只要将元素添加到了文档碎片对象中, 那么这个元素就会自动从网页上消失
+            fragment.appendChild(node);
+            node = app.firstChild;
+        }
+        // 3.返回存储了所有元素的文档碎片对象
+        return fragment;
+    }
+    buildTemplate(fragment){
+        let nodeList = [...fragment.childNodes];
+        nodeList.forEach(node=>{
+            // 需要判断当前遍历到的节点是一个元素还是一个文本
+            // 如果是一个元素, 我们需要判断有没有v-model属性
+            // 如果是一个文本, 我们需要判断有没有{{}}的内容
+            if(this.vm.isElement(node)){
+                // 是一个元素
+                this.buildElement(node);
+                // 处理子元素(处理后代)
+                this.buildTemplate(node);
+            }else{
+                // 不是一个元素
+                this.buildText(node);
+            }
+        })
+    }
+    buildElement(node){
+        let attrs = [...node.attributes];
+        attrs.forEach(attr => {
+            let {name, value} = attr; // v-model="name" / name:v-model / value:name
+            if(name.startsWith('v-')){ // v-model / v-html / v-text / v-xxx
+                let [_, directive] = name.split('-'); // v-model -> [v, model]
+                CompilerUtil[directive](node, value, this.vm);
+            }
+        })
+    }
+    buildText(node){
+        let content = node.textContent;
+        let reg = /\{\{.+?\}\}/gi;
+        if(reg.test(content)){
+            console.log('是{{}}的文本, 需要我们处理', content);
+        }
+    }
+}
+```
+
+### 8.编译模板数据
+
+```javascript
+let CompilerUtil = {
+    getValue(vm, value){
+        // time.h --> [time, h]
+       return value.split('.').reduce((data, currentKey) => {
+            // 第一次执行: data=$data, currentKey=time
+            // 第二次执行: data=time, currentKey=h
+            return data[currentKey.trim()];
+        }, vm.$data);
+    },
+    getContent(vm, value){
+        // console.log(value); //  {{name}}-{{age}} -> 李南江-{{age}}  -> 李南江-33
+        let reg = /\{\{(.+?)\}\}/gi;
+        let val = value.replace(reg, (...args) => {
+            // 第一次执行 args[1] = name
+            // 第二次执行 args[1] = age
+            // console.log(args);
+            return this.getValue(vm, args[1]); // 李南江, 33
+        });
+        // console.log(val);
+        return val;
+    },
+    model: function (node, value, vm) {
+        let val = this.getValue(vm, value);
+        node.value = val;
+    },
+    html: function (node, value, vm) {
+        let val = this.getValue(vm, value);
+        node.innerHTML = val;
+    },
+    text: function (node, value, vm) {
+        let val = this.getValue(vm, value);
+        node.innerText = val;
+    },
+    content: function (node, value, vm) {
+        // console.log(value); // {{ name }} -> name -> $data[name]
+        let val = this.getContent(vm, value);
+        node.textContent = val;
+    }
+}
+class Nue {
+    constructor(options){
+        // 1.保存创建时候传递过来的数据
+        if(this.isElement(options.el)){
+            this.$el = options.el;
+        }else{
+            this.$el = document.querySelector(options.el);
+        }
+        this.$data = options.data;
+        // 2.根据指定的区域和数据去编译渲染界面
+        if(this.$el){
+            new Compiler(this);
+        }
+    }
+    // 判断是否是一个元素
+    isElement(node){
+        return node.nodeType === 1;
+    }
+}
+class Compiler {
+    constructor(vm){
+        this.vm = vm;
+        // 1.将网页上的元素放到内存中
+        let fragment = this.node2fragment(this.vm.$el);
+        // 2.利用指定的数据编译内存中的元素
+        this.buildTemplate(fragment);
+        // 3.将编译好的内容重新渲染会网页上
+        this.vm.$el.appendChild(fragment);
+    }
+    node2fragment(app){
+        // 1.创建一个空的文档碎片对象
+        let fragment = document.createDocumentFragment();
+        // 2.编译循环取到每一个元素
+        let node = app.firstChild;
+        while (node){
+            // 注意点: 只要将元素添加到了文档碎片对象中, 那么这个元素就会自动从网页上消失
+            fragment.appendChild(node);
+            node = app.firstChild;
+        }
+        // 3.返回存储了所有元素的文档碎片对象
+        return fragment;
+    }
+    buildTemplate(fragment){
+        let nodeList = [...fragment.childNodes];
+        nodeList.forEach(node=>{
+            // 需要判断当前遍历到的节点是一个元素还是一个文本
+            if(this.vm.isElement(node)){
+                // 是一个元素
+                this.buildElement(node);
+                // 处理子元素(处理后代)
+                this.buildTemplate(node);
+            }else{
+                // 不是一个元素
+                this.buildText(node);
+            }
+        })
+    }
+    buildElement(node){
+        let attrs = [...node.attributes];
+        attrs.forEach(attr => {
+            let {name, value} = attr; // v-model="name" / name:v-model / value:name
+            if(name.startsWith('v-')){ // v-model / v-html / v-text / v-xxx
+                let [_, directive] = name.split('-'); // v-model -> [v, model]
+                CompilerUtil[directive](node, value, this.vm);
+            }
+        })
+    }
+    buildText(node){
+        let content = node.textContent;
+        let reg = /\{\{.+?\}\}/gi;
+        if(reg.test(content)){
+            CompilerUtil['content'](node, content, this.vm);
+        }
+    }
+}
+```
+
+### 9.监听数据发生变化
+
+```javascript
+let CompilerUtil = {
+    getValue(vm, value){
+        // time.h --> [time, h]
+       return value.split('.').reduce((data, currentKey) => {
+            // 第一次执行: data=$data, currentKey=time
+            // 第二次执行: data=time, currentKey=h
+            return data[currentKey.trim()];
+        }, vm.$data);
+    },
+    getContent(vm, value){
+        // console.log(value); //  {{name}}-{{age}} -> 李南江-{{age}}  -> 李南江-33
+        let reg = /\{\{(.+?)\}\}/gi;
+        let val = value.replace(reg, (...args) => {
+            // 第一次执行 args[1] = name
+            // 第二次执行 args[1] = age
+            // console.log(args);
+            return this.getValue(vm, args[1]); // 李南江, 33
+        });
+        // console.log(val);
+        return val;
+    },
+    model: function (node, value, vm) {
+        let val = this.getValue(vm, value);
+        node.value = val;
+    },
+    html: function (node, value, vm) {
+        let val = this.getValue(vm, value);
+        node.innerHTML = val;
+    },
+    text: function (node, value, vm) {
+        let val = this.getValue(vm, value);
+        node.innerText = val;
+    },
+    content: function (node, value, vm) {
+        // console.log(value); // {{ name }} -> name -> $data[name]
+        let val = this.getContent(vm, value);
+        node.textContent = val;
+    }
+}
+class Nue {
+    constructor(options){
+        // 1.保存创建时候传递过来的数据
+        if(this.isElement(options.el)){
+            this.$el = options.el;
+        }else{
+            this.$el = document.querySelector(options.el);
+        }
+        this.$data = options.data;
+        // 2.根据指定的区域和数据去编译渲染界面
+        if(this.$el){
+            // 第一步: 给外界传入的所有数据都添加get/set方法
+            //         这样就可以监听数据的变化了
+            new Observer(this.$data);
+            new Compiler(this);
+        }
+    }
+    // 判断是否是一个元素
+    isElement(node){
+        return node.nodeType === 1;
+    }
+}
+class Compiler {
+    constructor(vm){
+        this.vm = vm;
+        // 1.将网页上的元素放到内存中
+        let fragment = this.node2fragment(this.vm.$el);
+        // 2.利用指定的数据编译内存中的元素
+        this.buildTemplate(fragment);
+        // 3.将编译好的内容重新渲染会网页上
+        this.vm.$el.appendChild(fragment);
+    }
+    node2fragment(app){
+        // 1.创建一个空的文档碎片对象
+        let fragment = document.createDocumentFragment();
+        // 2.编译循环取到每一个元素
+        let node = app.firstChild;
+        while (node){
+            // 注意点: 只要将元素添加到了文档碎片对象中, 那么这个元素就会自动从网页上消失
+            fragment.appendChild(node);
+            node = app.firstChild;
+        }
+        // 3.返回存储了所有元素的文档碎片对象
+        return fragment;
+    }
+    buildTemplate(fragment){
+        let nodeList = [...fragment.childNodes];
+        nodeList.forEach(node=>{
+            // 需要判断当前遍历到的节点是一个元素还是一个文本
+            if(this.vm.isElement(node)){
+                // 是一个元素
+                this.buildElement(node);
+                // 处理子元素(处理后代)
+                this.buildTemplate(node);
+            }else{
+                // 不是一个元素
+                this.buildText(node);
+            }
+        })
+    }
+    buildElement(node){
+        let attrs = [...node.attributes];
+        attrs.forEach(attr => {
+            let {name, value} = attr; // v-model="name" / name:v-model / value:name
+            if(name.startsWith('v-')){ // v-model / v-html / v-text / v-xxx
+                let [_, directive] = name.split('-'); // v-model -> [v, model]
+                CompilerUtil[directive](node, value, this.vm);
+            }
+        })
+    }
+    buildText(node){
+        let content = node.textContent;
+        let reg = /\{\{.+?\}\}/gi;
+        if(reg.test(content)){
+            CompilerUtil['content'](node, content, this.vm);
+        }
+    }
+}
+class Observer{
+    // 只要将需要监听的那个对象传递给Observer这个类
+    // 这个类就可以快速的给传入的对象的所有属性都添加get/set方法
+    constructor(data){
+        this.observer(data);
+    }
+    observer(obj){
+        if(obj && typeof obj === 'object'){
+            // 遍历取出传入对象的所有属性, 给遍历到的属性都增加get/set方法
+            for(let key in obj){
+                this.defineRecative(obj, key, obj[key])
+            }
+        }
+    }
+    // obj: 需要操作的对象
+    // attr: 需要新增get/set方法的属性
+    // value: 需要新增get/set方法属性的取值
+    defineRecative(obj, attr, value){
+        // 如果属性的取值又是一个对象, 那么也需要给这个对象的所有属性添加get/set方法
+        this.observer(value);
+        Object.defineProperty(obj, attr, {
+            get(){
+                return value;
+            },
+            set:(newValue)=>{
+                if(value !== newValue){
+                    // 如果给属性赋值的新值又是一个对象, 那么也需要给这个对象的所有属性添加get/set方法
+                    this.observer(newValue);
+                    value = newValue;
+                    console.log('监听到数据的变化, 需要去更新UI');
+                }
+            }
+        })
+    }
+}
+```
+
+### 10.数据驱动界面更新
+
+```javascript
 
 ```
 

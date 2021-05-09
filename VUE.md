@@ -1121,7 +1121,7 @@ directives: {
 
 ### 19.计算属性
 
-```
+```javascript
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1179,8 +1179,6 @@ directives: {
 </body>
 </html>
 ```
-
-
 
 ### 20.计算属性和函数
 

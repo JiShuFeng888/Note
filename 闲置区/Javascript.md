@@ -100,7 +100,8 @@ alert( undefined || null || 0 ); // 0（都是假值，返回最后一个值）
 ```
 
 
-
+concat:合并两个数组，并且返回新的合并后的数组，不改变原数组
+concat()方法用于连接两个或多个字符串。
 ###  1.工厂函数
 
 ```javascript
@@ -397,7 +398,7 @@ let fns = {
         2.对象在查找属性和方法的时候, 会先在当前对象查找
           如果当前对象中找不到想要的, 会依次去上一级原型对象中查找
           如果找到Object原型对象都没有找到, 就会报错
-         */
+*/
         function Person(myName, myAge) {
             this.name = myName;
             this.age = myAge;
@@ -451,22 +452,17 @@ let fns = {
 		 _// Object.keys 只返回自己的 key alert(Object.keys(rabbit)); 								// jumps_  _
 		 // for..in 会遍历自己以及继承的键 for(let prop in rabbit) alert(prop); // jumps，然后是 eats_
 
-let animal =  { eats:  true  }; 
 
- let rabbit =  { jumps:  true, __proto__: animal }; 
-
- for(let prop in rabbit)  {  let isOwn = rabbit.hasOwnProperty(prop);  
-
-if  (isOwn)  {  alert(`Our: ${prop}`);  // Our: jumps  }  else  {  alert(`Inherited: ${prop}`);  // Inherited: eats
+let animal =  { eats:  true  };  let rabbit =  { jumps:  true, __proto__: animal };  for(let prop in rabbit)  {  let isOwn = rabbit.hasOwnProperty(prop);  if  (isOwn)  {  alert(`Our: ${prop}`);  // Our: jumps  }  else  {  alert(`Inherited: ${prop}`);  // Inherited: eats
 
 
 几乎所有其他键/值获取方法都忽略继承的属性
 
 几乎所有其他键/值获取方法，例如  `Object.keys`  和  `Object.values`  等，都会忽略继承的属性。
 
-它们只会对对象自身进行操作。**不考虑**  继承自原型的属性。 
+它们只会对对象自身进行操作。**不考虑**  继承自原型的属性。
 
-```
+```javascript
 let hamster = {
   stomach: [],
 
@@ -491,50 +487,25 @@ alert( speedy.stomach ); // apple
 // 仓鼠 Lazy 的胃是空的
 alert( lazy.stomach ); // <nothing>
 
+function  Rabbit(name)  {  this.name = name;  alert(name);  }  let rabbit =  new  Rabbit("White Rabbit");  _let rabbit2 = new rabbit.constructor("Black Rabbit");_
 
+function Rabbit() {}Rabbit.prototype = {  eats: true};let rabbit = new Rabbit();Rabbit.prototype = {};alert( rabbit.eats ); // ?
 
-function  Rabbit(name)  { 
-	this.name = name;  
-	alert(name);
- }  
-let rabbit =  new  Rabbit("White Rabbit"); 
-_let rabbit2 = new rabbit.constructor("Black Rabbit");_
-
-
-
-
-
-function Rabbit() {}
-Rabbit.prototype = {eats: true};
-let rabbit = new Rabbit();
-Rabbit.prototype = {};
-alert( rabbit.eats ); // ?
-
-
-New 实现原理!!!!!
-New 实现原理!!!!!
-New 实现原理!!!!!
 
 let New = function (P) {
         let o = {};
         let arg = Array.prototype.slice.call(arguments,1);
         
         o.__proto__ = P.prototype;
-  
+        P.prototype.constructor = P;
        
         P.apply(o,arg);
-        //已经保存参数了
         
         return o;
 
 
-```
-
- 
-
 ### 13.封装性
 
-```
 ​```javascript
     /*
         1.局部变量和局部函数
@@ -894,11 +865,11 @@ let New = function (P) {
         let per = new Person();
         per.run();
 
-
-        1.js中继承的终极方法！！！！！！！！！！！！1
+        /*
+        1.js中继承的终极方法
         1.1在子类的构造函数中通过call借助父类的构造函数
         1.2将子类的原型对象修改为父类的实例对象
-   
+        */
         // let stu = new Student("ww", 19, 99);
         // console.log(stu.score);
         // stu.say();
@@ -1334,7 +1305,7 @@ let New = function (P) {
         console.log(p1.name);
         console.log(p2.name);
 ```
-
+		Object.assign(o,obj);
 ### 31.对象的深拷贝
 
 ```javascript
@@ -1522,7 +1493,7 @@ let New = function (P) {
             return -1;
         }
 
-        // findIndex实现
+        // find实现
         Array.prototype.myFind = function (fn) {
             for(let i = 0; i < this.length; i++){
                 let result = fn(this[i], i, this);
@@ -1911,200 +1882,3 @@ let New = function (P) {
 ### 42.函数节流和防抖
 
 ![批注 2021-03-14 094550](Javascript.assets/%E6%89%B9%E6%B3%A8%202021-03-14%20094550-1615686373559.png)
-
-### 43.闭包 
-
-```javascript
-function makeCounter() {
-  let count = 0;
-
-  return function() {
-    return count++;
-  };
-}
-
-let counter = makeCounter();
-let counter2 = makeCounter();
-
-alert( counter() ); // 0
-alert( counter() ); // 1
-
-alert( counter2() ); // ?
-alert( counter2() ); // ?
-
-
-
-
-function makeArmy() {
-  ...
-  let i = 0;
-  while (i < 10) {
-    let shooter = function() { // shooter 函数
-      alert( i ); // 应该显示它自己的编号
-    };
-    shooters.push(shooter); // 将 shooter 函数添加到该数组中
-      i++;
-  }
-  ...
-}
-```
-
-### 44.基本类型按值传递，引用类型按共享传递
-
-```javascript
-var person = {name: "MJ"};
-function foo(obj) {
-  obj = new Object(); // 修改部分
-  obj.name = "EP";
-}
-foo(person);
-console.log(person.name); 
-
-我们都知道对象保存在堆中，person持有堆中对象的引用，在调用foo函数时，函数接收的实际是person持有的对象（下面称之为原对象）引用的副本，这样obj和person都指向了同一个地方（也就是原对象在堆中存放的地址），而函数中的obj = new Object()操作其实是在堆中创建了一个新对象，并让obj持有该对象的引用，这样obj与原对象之间的关系就断开了，转而与新对象建立了关系，所以对obj的修改并不会影响到原对象。
-
-调用函数传参时，函数接受对象实参引用的副本(既不是按值传递的对象副本，也不是按引用传递的隐式引用)
-
-新开辟一块内存，把对象的引用赋值给它
-
-function sum(a) {
-
-  return function(b) {
-    return a + b; // 从外部词法环境获得 "a"
-  };
-
-}
-
-alert( sum(1)(2) ); // 3
-alert( sum(5)(-1) ); // 4
-```
-
-![微信图片_20210322215918](Javascript.assets/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20210322215918.png)
-
-### 45.预解析
-
-```javascript
-1.什么是预解析?
-    浏览器在执行JS代码的时候会分成两部分操作：预解析以及逐行执行代码
-也就是说浏览器不会直接执行代码, 而是加工处理之后再执行,
-    这个加工处理的过程, 我们就称之为预解析
-
-2.预解析规则
-2.1将变量声明和函数声明提升到当前作用域最前面
-2.2将剩余代码按照书写顺序依次放到后面
-
-3.注意点
-通过let定义的变量不会被提升(不会被预解析)
-
-      // 下列程序的执行结果是什么?
-        var a = 666;
-        test();
-        function test() {
-            var b = 777;
-            console.log(a);
-            console.log(b);
-            console.log(c);
-            var a = 888;
-            let c = 999;
-        }
-        /*
-        var a;
-        function test() {
-           var b;
-           var a;
-           b = 777;
-            console.log(a); // undefined
-            console.log(b); // 777
-            console.log(c); // 报错
-            a = 888;
-            let c = 999;
-        }
-        a = 666;
-        test();
-        */
-
-
-
-
-let x = 1;
-
-function func() {
-  console.log(x); // ReferenceError: Cannot access 'x' before initialization
-  let x = 2;
-}
-
-func();
-```
-
-### 46.call/apply
-
-```javascript
-call 和 apply 的共同点
-它们的共同点是，都能够改变函数执行时的上下文，将一个对象的方法交给另一个对象来执行，并且是立即执行的。
-
-call 的写法	
-    Function.call(obj,[param1[,param2[,…[,paramN]]]])
-    需要注意以下几点：
-    调用 call 的对象，必须是个函数 Function。
-    call 的第一个参数，是一个对象。 Function 的调用者，将会指向这个对象。如果不传，则默认为全局对象 window。
-    第二个参数开始，可以接收任意个参数。每个参数会映射到相应位置的 Function 的参数上。但是如果将所有的参数作为数组传入，它们会作为一个整体映射到 Function 对应的第一个参数上，之后参数都为空。
-    function func (a,b,c) {}
-
-    func.call(obj, 1,2,3)
-    // func 接收到的参数实际上是 1,2,3
-
-    func.call(obj, [1,2,3])
-    // func 接收到的参数实际上是 [1,2,3],undefined,undefined
-
-
-
-
-Function.apply(obj[,argArray])
-    需要注意的是：
-    它的调用者必须是函数 Function，并且只接收两个参数，第一个参数的规则与 call 一致。
-    第二个参数，必须是数组或者类数组，它们会被转换成类数组，传入 Function 中，并且会被映射到 Function 对应的参数上。这也是 call 和 apply 之间，很重要的一个区别。
-    func.apply(obj, [1,2,3])
-    // func 接收到的参数实际上是 1,2,3
-
-    func.apply(obj, {
-        0: 1,
-        1: 2,
-        2: 3,
-        length: 3
-    })
-    // func 接收到的参数实际上是 1,2,3
-
-
-有两种情况需要注意，传null或undefined时，将是JS执行环境的全局变量。浏览器中是window，其它环境（如node）则是global
-apply 的一些妙用
-    1、Math.max。用它来获取数组中最大的一项。
-
-    let max = Math.max.apply(null, array);
-    同理，要获取数组中最小的一项，可以这样：
-
-    let min = Math.msn.apply(null, array);
-    2、实现两个数组合并。在 ES6 的扩展运算符出现之前，我们可以用 Array.prototype.push来实现。
-
-    let arr1 = [1, 2, 3];
-    let arr2 = [4, 5, 6];
-
-    Array.prototype.push.apply(arr1, arr2);
-    console.log(arr1); // [1, 2, 3, 4, 5, 6]
-```
-
-### 47.Promise
-
-```
-由 new Promise 构造器返回的 promise 对象具有以下内部属性：
-
-state — 最初是 "pending"，然后在 resolve 被调用时变为 "fulfilled"，或者在 reject 被调用时变为 "rejected"。
-result — 最初是 undefined，然后在 resolve(value) 被调用时变为 value，或者在 reject(error) 被调用时变为 error。
-```
-
-### 48.执行上下文
-
-```
-	全局执行上下文 — 这是默认或者说基础的上下文，任何不在函数内部的代码都在全局上下文中。它会执行两件事：创建一个全局的 window 对象（浏览器的情况下），并且设置 this 的值等于这个全局对象。一个程序中只会有一个全局执行上下文。
-	函数执行上下文 — 每当一个函数被调用时, 都会为该函数创建一个新的上下文。每个函数都有它自己的执行上下文，不过是在函数被调用时创建的。函数上下文可以有任意多个。每当一个新的执行上下文被创建，它会按定义的顺序（将在后文讨论）执行一系列步骤。
-	Eval 函数执行上下文 — 执行在 eval 函数内部的代码也会有它属于自己的执行上下文，但由于 JavaScript 开发者并不经常使用 eval，所以在这里我不会讨论它。
-```
-
