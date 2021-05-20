@@ -286,7 +286,6 @@ splice(index,1)删除index位置的元素
 import store from './../store/index'
 const request=axios.create({
    baseURL:"http://157.122.54.189:9083",
-
 })
 
 // 添加请求拦截器
@@ -574,11 +573,18 @@ v-if处理条件渲染:随着弹出层的关闭而销毁
 如果有多个数据需要同步绑定，可用.sync修饰符
 ：gender.sync="user.gender"
 相当于
-@update:gender="user.gender"  接受名称要写gender
-@update:属性名称="user.gender"
+@update:gender="user.gender=$event"  接受名称要写gender
 
-一般把最常用的数据设计为v-model
-不太常用的数据设计为.sync 
+@update:属性名称="user.gender=$event"
+
+
+//父组件将age传给子组件并使用.sync修饰符。
+<MyFooter :age.sync="age">
+</MyFooter>
+//子组件触发事件
+ mounted () {
+    console.log(this.$emit('update:age',1234567));
+ }
 ```
 
 ### 31.<input type="file" hidden ref=file
